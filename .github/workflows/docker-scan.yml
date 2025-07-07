@@ -1,0 +1,32 @@
+name: Scan Python 3.9 Image for Vulnerabilities
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    name: Trivy Docker Image Scan
+
+    steps:
+    - name: Checkout (dummy step, required by GitHub)
+      uses: actions/checkout@v3
+
+    - name: Run Trivy Scan on python:3.9
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'python:3.9'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+
+    - name: Save Report
+      run: |
+        mkdir -p scan-reports
+        trivy image --format json --output scan-reports/python39-report.json python:3.9
+
+    - name: Upload Report Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: python39-vuln-report
+        path: scan-reports/python39-report.json
